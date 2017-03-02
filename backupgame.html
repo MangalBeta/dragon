@@ -41,21 +41,21 @@
 
 
      //set the initial postion dragon
-     var x = 0;
-     var y = 200;
+     var x = canvasWidth/2;
+     var y = canvasHeight/2;
      //set the on mouse move new pos dragon
-     var newX = 0;
-     var newY = 200;
+     var newX = canvasWidth/2;
+     var newY = canvasHeight/2;;
      // new vars needed for movement
      var srcX = 0;
      var srcY = 0;
      // use for movement left right
-     var right = true;
+     var right = false;
      var left = false;
      var up = false;
      var down = false;
      var food = {};
-     var speed = 10;
+     var speed = 1;
      var canvas = document.getElementById('canvas');
      canvas.width = canvasWidth;
      canvas.height = canvasHeight;
@@ -75,7 +75,7 @@
 /********* background animate code ************/
      var totalSeconds = 0;
       var img = new Image();
-      img.src = 'http://bdadam.com/static/article-assets/background-to-scroll.jpg';
+      img.src = 'background-to-scroll.png';
  var lastFrameTime = 0;
 function loop() {
            // requestAnimationFrame(loop);
@@ -88,6 +88,7 @@ function drawBack(delta) {
                  totalSeconds += delta;
                  var vx = 100; // the background scrolls with a speed of 100 pixels/sec
                  var numImages = Math.ceil(canvas.width / img.width) + 1;
+                 //console.log(numImages,"numImages");
                  var xpos = totalSeconds * vx % img.width;
                  ctx.save();
                  ctx.translate(-xpos, 0);
@@ -99,18 +100,19 @@ function drawBack(delta) {
 
 }
   function movePlayer() {
-          ctx.clearRect(x,y,width,height);
-          var tx = newX - x,
-          ty = newY - y,
-          dist = Math.sqrt(tx * tx + ty * ty);
-          if (dist >= speed) {
-               srcX = (tx / dist) * speed;
-               srcY = (ty / dist) * speed;
-               x += srcX;
-               y += srcY;
-          }
+          // ctx.clearRect(x,y,width,height);
+          // var tx = newX - x,
+          // ty = newY - y,
+          // dist = Math.sqrt(tx * tx + ty * ty);
+          // if (dist >= speed) {
+          //      srcX = (tx / dist) * speed;
+          //      srcY = (ty / dist) * speed;
+          //      x += srcX;
+          //      y += srcY;
+          // }
      /************** call movement function **************/
-if(left || right) {
+           if(left || right) {
+                console.log("here in left ri")
                     curFrame = ++curFrame % frameCount;
                     srcX = curFrame * width;
                     //console.log(srcX);
@@ -118,11 +120,11 @@ if(left || right) {
 
                     if(left && x>0){
                          srcY = trackLeft * height;
-                         x-=speed;
+                         x -=speed;
                     }
                     if(right && x<canvasWidth-width){
                          srcY = trackRight * height;
-                         x+=speed;
+                         x +=speed;
                     }
                } else if (up || down) {
                     curFrame = ++curFrame % frameCount;
@@ -131,17 +133,18 @@ if(left || right) {
                     ctx.clearRect(x,y,width,height);
                     if(up && x>0){
                          srcY = trackUp * height;
-                         y-=speed;
+                         y -=speed;
                     }
                     if(down && x<canvasHeight-width){
                          srcY = trackDown * height;
-                         y+=speed;
+                         y +=speed;
                     }
           }
 
      }
 /**************** Movment function ******************/
      function moveUp(){
+          console.log("up")
           up = true;
           down = false;
           left = false;
@@ -149,6 +152,7 @@ if(left || right) {
      }
 
      function moveDown(){
+                    console.log("down")
           up = false;
           down = true;
           left = false;
@@ -156,6 +160,7 @@ if(left || right) {
      }
 
      function moveLeft(){
+     console.log("moveLeft")
           up = false;
           down = false;
           left = true;
@@ -163,6 +168,7 @@ if(left || right) {
      }
 
      function moveRight(){
+          console.log("moveRight")
           up = false;
           down = false;
           left = false;
@@ -189,7 +195,6 @@ function randomColorCircle(){
      for (var i = 0; i < 50; i++) {
        var r = randoms();
        drawCircle(r.size, r.x, r.y, r.colour);
-
        // r = randoms();
        // drawSplatter(r.size, r.x, r.y, r.colour);
      }
@@ -197,8 +202,8 @@ function randomColorCircle(){
 }
 /************** Draw dragon ***************/
   function draw(){
-          // loop();
-          movePlayer()
+          loop();
+          //movePlayer()
           //updateFrame();
           //ctx.fillRect(x, y, 10, 10);
            ctx.clearRect(x,y,width,height);
@@ -234,49 +239,67 @@ document.onkeypress = function (e) {
 };
 
 /****************************************** Getting the Mouse Position *****************************/
-function getPosition(el) {
-          var xPosition = 0;
-          var yPosition = 0;
-          while (el) {
-               xPosition += (el.offsetLeft - el.scrollLeft + el.clientLeft);
-               yPosition += (el.offsetTop - el.scrollTop + el.clientTop);
-               el = el.offsetParent;
-          }
-          return {
-               x: xPosition,
-               y: yPosition
-          };
+// function getPosition(el) {
+//           var xPosition = 0;
+//           var yPosition = 0;
+//           while (el) {
+//                xPosition += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+//                yPosition += (el.offsetTop - el.scrollTop + el.clientTop);
+//                el = el.offsetParent;
+//           }
+//           return {
+//                x: xPosition,
+//                y: yPosition
+//           };
+// }
+//      var canvasPos = getPosition(canvas);
+function getPostionOnClick(event) {
+      var xPosition = 0;
+      var yPosition = 0;
+        event = event || window.event;
+        xPosition = event.pageX - canvas.offsetLeft,
+        yPosition = event.pageY - canvas.offsetTop;
+        return {
+             x: xPosition,
+             y: yPosition
+        }
+
 }
-     var canvasPos = getPosition(canvas);
-     canvas.addEventListener("mousemove", function(event){
-          newX = event.clientX - canvasPos.x;
-          newY = event.clientY - canvasPos.y;
-          // console.log("x"+x, "y"+y)
-          // console.log("newx==="+newX, "newy===="+newY)
-          if(x < newX && y < newY) {
+
+canvas.addEventListener("mousemove", function(event){
+          var canvasPos = getPostionOnClick(event);
+          newX = canvasPos.x;
+          newY = canvasPos.y;
+          console.log("x"+x, "y"+y)
+          console.log("newx==="+newX, "newy===="+newY)
+          if(x < newX) {
                console.log("1111111")
                moveRight();
           }
-          else if(x > newX && y < newY){
+          else if(x > newX ){
                console.log("22222222222")
                moveLeft();
-      }
-           else if (y < newY){
-                    console.log("33333333333")
-                    moveDown();
           }
-            else if(y > newY ){
-               moveUp();
-              }
+          //  else if (y < newY ){
+          //           console.log("33333333333")
+          //           moveDown();
+          // }
+          //  else if(y > newY && x > newX){
+          //      moveUp();
+          //    }
+           //  movePlayer();
 
         });
 
      /********************************* Mouse Postion *************************************************************/
 // randomColorCircle();
-setInterval(draw,1000);
-
+var intervalstart = setInterval(draw,100);
+function myStopFunction() {
+   clearInterval(intervalstart);
+}
 
      </script>
+     <button onclick="myStopFunction()">stop</button>
 </body>
 </html>
 <style>

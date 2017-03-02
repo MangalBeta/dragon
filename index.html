@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+     <title>JavaScript Sprite Animation Tutorial</title>
+</head>
+<body>
+
+     <canvas id='canvas'></canvas><br />
+     <button onclick='moveLeft()'>Left</button>
+     <button onclick='moveRight()'>Right</button>
+     <script>
+     var canvasWidth = 650;
+     var canvasHeight = 350;
+
+     var spriteWidth = 576;
+     var spriteHeight = 384;
+
+     var rows = 8;
+     var cols = 12;
+
+     var trackRight = 2;
+     var trackLeft = 5;
+
+     var width = spriteWidth/cols;
+     var height = spriteHeight/rows;
+
+     var curFrame = 0;
+     var frameCount = 12;
+
+     var x=0;
+     var y=200;
+
+     var srcX;
+     var srcY;
+
+     var left = false;
+     var right = true;
+
+     var speed = 12;
+
+     var canvas = document.getElementById('canvas');
+     canvas.width = canvasWidth;
+     canvas.height = canvasHeight;
+
+     var ctx = canvas.getContext("2d");
+
+     var character = new Image();
+     character.src = "monster.png";
+
+     function updateFrame(){
+          //console.log(curFrame);
+          curFrame = ++curFrame % frameCount;
+          srcX = curFrame * width;
+          //console.log(srcX);
+          ctx.clearRect(x,y,width,height);
+
+          if(left && x>0){
+               srcY = trackLeft * height;
+               x-=speed;
+          }
+          if(right && x<canvasWidth-width){
+               srcY = trackRight * height;
+               x+=speed;
+          }
+     }
+
+     function getObjectHeright () {
+          curFrame = ++curFrame % frameCount;
+          srcX = curFrame * width;
+          return srcX;
+     }
+
+
+
+
+     function moveLeft(){
+          left = true;
+          right = false;
+     }
+
+     function moveRight(){
+          left = false;
+          right = true;
+     }
+
+     function draw(){
+          updateFrame();
+          ctx.drawImage(character,srcX,srcY,width,height,x,y,width,height);
+          if(x > 500) {
+               moveLeft();
+          }
+          if(x == 0) {
+               moveRight();
+          }
+
+     }
+
+     function mousedownCanvas (event) {
+
+          switch (event.which) {
+               case 1:
+               console.log('Left Mouse button pressed.');
+               break;
+               case 2:
+               console.log('Middle Mouse button pressed.');
+               break;
+               case 3:
+               console.log('Right Mouse button pressed.');
+               break;
+               default:
+               console.log('You have a strange Mouse!');
+          }
+     }
+
+     document.getElementById("canvas").addEventListener("click", function(event){
+          if(x < event.clientX) {
+               moveRight();
+          } else {
+               moveLeft();
+          }
+
+     });
+
+     document.onkeypress = function (e) {
+          e = e || window.event;
+          if(e.keyCode == 39) {
+               moveRight();
+          } else if (e.keyCode == 37) {
+               moveLeft();
+          }
+     };
+     setInterval(draw,100);
+
+     </script>
+</body>
+</html>
