@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+     <title>Dragon Game</title>
+     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+</head>
+<body>
+     <div style="margin-top:30px; margin-left:60px;">
+          <canvas id='canvas'></canvas><br />
+     </div>
+
+     <script>
+     /** canvas dimensions */
+     var canvasWidth = 1080;
+     var canvasHeight = 500;
+     var cellWidth;
+     var cellHeight;
+
+     /*********************Start Code for Dragon sprite *******************/
+     /** object dimensions */
+     var spriteWidth = 750;
+     var spriteHeight = 560;
+     /** cols & rows of sprite*/
+     var rows = 8;
+     var cols = 10;
+     /** track dragon left right and top bottom **/
+     var trackRight = 0;
+     var trackLeft = 4;
+     var trackUp = 6;
+     var trackDown = 2;
+
+     /** width and height of the dragon **/
+     var width = spriteWidth/cols;
+     var height = spriteHeight/rows;
+
+     var curFrame = 0;
+     var frameCount = 10;
+/********************** end sprite dragon code ****************************/
+
+
+     //set the initial postion dragon
+     var x = 0;
+     var y = 200;
+     //set the on mouse move new pos dragon
+     var newX = 0;
+     var newY = 200;
+     // new vars needed for movement
+     var srcX = 0;
+     var srcY = 0;
+     // use for movement left right
+     var right = true;
+     var left = false;
+     var up = false;
+     var down = false;
+     var food = {};
+     var speed = 10;
+     var canvas = document.getElementById('canvas');
+     canvas.width = canvasWidth;
+     canvas.height = canvasHeight;
+     var ctx = canvas.getContext("2d");
+
+/******** set the circle size ********/
+     var maxSize = 30;
+     var minSize = 10;
+     var maxX = canvas.width;
+     var maxY = canvas.height;
+     // create image for dragon
+     var dragon = new Image();
+     dragon.src = "dragon.gif";
+
+/************* moveplayer **********/
+
+/********* background animate code ************/
+     var totalSeconds = 0;
+      var img = new Image();
+      img.src = 'http://bdadam.com/static/article-assets/background-to-scroll.jpg';
+ var lastFrameTime = 0;
+function loop() {
+           // requestAnimationFrame(loop);
+            var now = Date.now();
+            var deltaSeconds = (now - lastFrameTime) / 1000;
+            lastFrameTime = now;
+            drawBack(deltaSeconds);
+      }
+function drawBack(delta) {
+                 totalSeconds += delta;
+                 var vx = 100; // the background scrolls with a speed of 100 pixels/sec
+                 var numImages = Math.ceil(canvas.width / img.width) + 1;
+                 var xpos = totalSeconds * vx % img.width;
+                 ctx.save();
+                 ctx.translate(-xpos, 0);
+                 for (var i = 0; i < numImages; i++) {
+                     ctx.drawImage(img, i * img.width, 0);
+
+                 }
+                 ctx.restore();
+
+}
+  function movePlayer() {
+          ctx.clearRect(x,y,width,height);
+          var tx = newX - x,
+          ty = newY - y,
+          dist = Math.sqrt(tx * tx + ty * ty);
+          if (dist >= speed) {
+               srcX = (tx / dist) * speed;
+               srcY = (ty / dist) * speed;
+               x += srcX;
+               y += srcY;
+          }
+     /************** call movement function **************/
+if(left || right) {
+                    curFrame = ++curFrame % frameCount;
+                    srcX = curFrame * width;
+                    //console.log(srcX);
+                    ctx.clearRect(x,y,width,height);
+
+                    if(left && x>0){
+                         srcY = trackLeft * height;
+                         x-=speed;
+                    }
+                    if(right && x<canvasWidth-width){
+                         srcY = trackRight * height;
+                         x+=speed;
+                    }
+               } else if (up || down) {
+                    curFrame = ++curFrame % frameCount;
+                    srcX = curFrame * width;
+                    //console.log(srcX);
+                    ctx.clearRect(x,y,width,height);
+                    if(up && x>0){
+                         srcY = trackUp * height;
+                         y-=speed;
+                    }
+                    if(down && x<canvasHeight-width){
+                         srcY = trackDown * height;
+                         y+=speed;
+                    }
+          }
+
+     }
+/**************** Movment function ******************/
+     function moveUp(){
+          up = true;
+          down = false;
+          left = false;
+          right = false;
+     }
+
+     function moveDown(){
+          up = false;
+          down = true;
+          left = false;
+          right = false;
+     }
+
+     function moveLeft(){
+          up = false;
+          down = false;
+          left = true;
+          right = false;
+     }
+
+     function moveRight(){
+          up = false;
+          down = false;
+          left = false;
+          right = true;
+     }
+/************** Random value function ***********/
+  function randoms() {
+  var size = Math.ceil(Math.random() * maxSize);
+   size = Math.max(size, minSize);
+   var x = Math.floor(Math.random() * maxX);
+   var y = Math.floor(Math.random() * maxY);
+   var colour = '#' + Math.random().toString(16).substr(2,6);
+   return {size:size, x:x, y:y, colour:colour};
+}
+/******** draw  circle **************/
+function drawCircle(size, xPos, yPos, colour){// step -10  darw food
+       ctx.beginPath();
+       ctx.arc(xPos, yPos, size, 0, 4 * Math.PI);
+       ctx.fillStyle = colour;
+       ctx.fill();
+
+}
+function randomColorCircle(){
+     for (var i = 0; i < 50; i++) {
+       var r = randoms();
+       drawCircle(r.size, r.x, r.y, r.colour);
+
+       // r = randoms();
+       // drawSplatter(r.size, r.x, r.y, r.colour);
+     }
+
+}
+/************** Draw dragon ***************/
+  function draw(){
+          // loop();
+          movePlayer()
+          //updateFrame();
+          //ctx.fillRect(x, y, 10, 10);
+           ctx.clearRect(x,y,width,height);
+          ctx.drawImage(dragon,srcX,srcY,width,height,x,y,width,height);
+
+          if(x > canvasWidth-80) {
+               //console.log("touch")
+               moveLeft();
+          }
+          if(x == 0) {
+               moveRight();
+          }
+          if(y > canvasHeight-60) {
+               moveUp();
+          }
+          if(y <= 0 ) {
+               moveLeft();
+          }
+
+     }
+/********* on keypress Event ***********/
+document.onkeypress = function (e) {
+          e = e || window.event;
+          if(e.keyCode == 39) {
+               moveRight();
+          } else if (e.keyCode == 37) {
+               moveLeft();
+          }else if (e.keyCode == 38) {
+               moveUp();
+          }else if (e.keyCode == 40) {
+               moveDown();
+          }
+};
+
+/****************************************** Getting the Mouse Position *****************************/
+function getPosition(el) {
+          var xPosition = 0;
+          var yPosition = 0;
+          while (el) {
+               xPosition += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+               yPosition += (el.offsetTop - el.scrollTop + el.clientTop);
+               el = el.offsetParent;
+          }
+          return {
+               x: xPosition,
+               y: yPosition
+          };
+}
+     var canvasPos = getPosition(canvas);
+     canvas.addEventListener("mousemove", function(event){
+          newX = event.clientX - canvasPos.x;
+          newY = event.clientY - canvasPos.y;
+          // console.log("x"+x, "y"+y)
+          // console.log("newx==="+newX, "newy===="+newY)
+          if(x < newX && y < newY) {
+               console.log("1111111")
+               moveRight();
+          }
+          else if(x > newX && y < newY){
+               console.log("22222222222")
+               moveLeft();
+      }
+           else if (y < newY){
+                    console.log("33333333333")
+                    moveDown();
+          }
+            else if(y > newY ){
+               moveUp();
+              }
+
+        });
+
+     /********************************* Mouse Postion *************************************************************/
+// randomColorCircle();
+setInterval(draw,100);
+
+
+     </script>
+</body>
+</html>
+<style>
+#canvas{
+     border : 3px solid blue;
+}
+/*body{
+     background-image: url("background-images-for-games-11.jpg");
+     background-repeat:no-repeat;
+     background-position: center center;
+}*/
+</style>
