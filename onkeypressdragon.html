@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+     <title>JavaScript Sprite Animation Tutorial</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> 
+     <style>
+  /*   #canvas {
+          border: 3px solid blue;
+          background : green;
+     }*/
+     body{
+background-image: url("http://hd-wall-papers.com/images/wallpapers/background-images-for-games/background-images-for-games-11.jpg");
+background-repeat:no-repeat;
+background-position: center center;
+}
+     </style>
+</head>
+<body>
+  <div style="margin-top:30px; margin-left:60px;">
+     <canvas id='canvas'></canvas><br />
+   
+     </div>
+     <script>
+     /** canvas dimensions */
+     var canvasWidth = 1260;
+     var canvasHeight = 520;
+
+     var cellWidth;
+     var cellHeight;
+
+    /*********************Start Code for Dragon sprite *******************/
+     /** object dimensions */
+     var spriteWidth = 750;
+     var spriteHeight = 560;
+     /** cols & rows of sprite*/
+     var rows = 8;
+     var cols = 10;
+     /** track dragon left right and top bottom **/
+     var trackRight = 0;
+     var trackLeft = 4;
+     var trackUp = 6;
+     var trackDown = 2;
+
+     /** width and height of the dragon **/
+     var width = spriteWidth/cols;
+     var height = spriteHeight/rows;
+
+     var curFrame = 0;
+     var frameCount = 10;
+    /********************** end sprite dragon code ****************************/
+
+
+    /************* Start code monster dragon for set width height row and column *********/
+ /** object dimensions */
+     //var spriteMonsterWidth = 576;
+     //var spriteMonsterHeight = 384;
+     /** cols & rows of sprite*/
+     //var rowsMonster = 8;
+     //var colsMonster = 12;
+     /** track dragon left right and top bottom **/
+     // var trackRight = 0;
+     // var trackLeft = 4;
+     // var trackUp = 6;
+     // var trackDown = 2;
+ 
+     /** width and height of the dragon **/
+   //  var widthMonster = spriteMonsterWidth/colsMonster;
+    // var heightMonster = spriteMonsterHeight/rowsMonster;
+
+    /********************** end monster dragon ***********************/ 
+
+
+     var x = 0;
+     var y = 200;
+
+     var srcX;
+     var srcY;
+
+     var right = true;
+     var left = false;
+     var up = false;
+     var down = false;
+     var food = {};
+
+     var speed = 10;
+     var canvas = document.getElementById('canvas');
+     canvas.width = canvasWidth;
+     canvas.height = canvasHeight;
+     var ctx = canvas.getContext("2d");
+
+     // create image for dragon
+     var dragon = new Image();
+     dragon.src = "dragon.gif";
+         
+    // create image for monster dragon
+    // var monsterDragon = new Image();
+    //  monsterDragon.src = "monster.png";
+
+
+     // end monster dragon
+     function updateFrame(){
+          //console.log(curFrame);
+          if(left || right) {
+               curFrame = ++curFrame % frameCount;
+               srcX = curFrame * width;
+               //console.log(srcX);
+               ctx.clearRect(x,y,width,height);
+
+               if(left && x>0){
+                    srcY = trackLeft * height;
+                    x-=speed;
+               }
+               if(right && x<canvasWidth-width){
+                    srcY = trackRight * height;
+                    x+=speed;
+               }
+          } else if (up || down) {
+               curFrame = ++curFrame % frameCount;
+               srcX = curFrame * width;
+               //console.log(srcX);
+               ctx.clearRect(x,y,width,height);
+
+               if(up && x>0){
+                    srcY = trackUp * height;
+                    y-=speed;
+               }
+               if(down && x<canvasWidth-width){
+                    srcY = trackDown * height;
+                    y+=speed;
+               }
+
+          }
+
+
+     }
+
+     function moveUp(){
+          up = true;
+          down = false;
+          left = false;
+          right = false;
+     }
+
+     function moveDown(){
+          up = false;
+          down = true;
+          left = false;
+          right = false;
+     }
+
+     function moveLeft(){
+          up = false;
+          down = false;
+          left = true;
+          right = false;
+     }
+
+     function moveRight(){
+          up = false;
+          down = false;
+          left = false;
+          right = true;
+     }
+
+     function draw(){
+          updateFrame();
+          ctx.drawImage(dragon,srcX,srcY,width,height,x,y,width,height);
+         // ctx.drawImage(dragon,srcX,srcY,width,height,x,y,width,height);
+          // drawMonster(monsterDragon,srcX,srcY,widthMonster,heightMonster,200,100,widthMonster,heightMonster)
+          console.log(x,y);
+          //console.log(cellWidth,cellHeight);
+          drawCell(x,y);
+          if(x > canvasWidth-80) {
+               console.log("touch")
+               moveLeft();
+          }
+          if(x == 0) {
+               moveRight();
+          }
+
+          if(y > canvasHeight-60) {
+               moveUp();
+          }
+          if(y == 0) {
+               moveDown();
+          }
+     }
+
+     function drawCell(x,y){// step -10  darw food
+          //console.log(width, height);
+          cellWidth = x*width;
+          cellHeight = y*height;
+          ctx.fillStyle="red";
+          ctx.fillRect(cellWidth,cellHeight,15,15);
+          // ctx.strokeStyle="white";
+          // ctx.strokeRect(x*width,y*width,15,15);
+
+     }
+
+     document.getElementById("canvas").addEventListener("click", function(event){
+          if(x < event.clientX) {
+               moveRight();
+          } else {
+               moveLeft();
+          }
+
+     });
+
+     document.onkeypress = function (e) {
+          e = e || window.event;
+          if(e.keyCode == 39) {
+               moveRight();
+          } else if (e.keyCode == 37) {
+               moveLeft();
+          }else if (e.keyCode == 38) {
+               moveUp();
+          }else if (e.keyCode == 40) {
+               moveDown();
+          }
+     };
+     // console.log(Math.round(Math.random()*Math.ceil((height)/15)));
+     // console.log(Math.round(Math.random()*Math.ceil((width)/15)));
+
+     drawCell(7, 4);
+     setInterval(draw,100);
+
+     </script>
+</body>
+</html>
